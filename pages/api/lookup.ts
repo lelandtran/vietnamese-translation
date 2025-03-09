@@ -6,11 +6,8 @@ import {
   wordNormalization,
   meanings,
 } from "../../lib/schema";
-import { eq } from "drizzle-orm";
-import { WordWithMeanings } from "../../lib/types";
 import { NormalizedWordLookupFactory } from "../../services/NormalizedWordLookupService";
-import { OpenAINormalizedWordLookupService } from "../../services/OpenAINormalizedWordLookupService";
-import { GeminiNormalizedWordLookupService } from "../../services/GeminiNormalizedWordLookupService";
+import { PostgresNormalizedLookupService } from "../../services/PostgresNormalizedLookupService";
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,80 +17,15 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { word: normalizedWord, service = "openai" } = req.query;
+  const { word: normalizedWord } = req.query;
 
   if (!normalizedWord || typeof normalizedWord !== "string") {
     return res.status(400).json({ error: "Normalized word is required" });
   }
 
   try {
-    // Check if the normalized word exists in our database
-    const normalizedWordResult = await db
-      .select()
-      .from(normalizedWords)
-      .where(eq(normalizedWords.normalizedWord, normalizedWord.toLowerCase()))
-      .limit(1);
-
-    let words: WordWithMeanings[] = [];
-
-    if (normalizedWordResult.length > 0) {
-      // Get the normalized word ID
-      const normalizedId = normalizedWordResult[0].id;
-
-      // Get all words linked to this normalized word
-      const wordLinks = await db
-        .select({
-          wordId: wordNormalization.wordId,
-        })
-        .from(wordNormalization)
-        .where(eq(wordNormalization.normalizedId, normalizedId));
-
-      const wordIds = wordLinks.map((link) => link.wordId);
-
-      // Build the results
-      const results: WordWithMeanings[] = [];
-
-      for (const wordId of wordIds) {
-        // Get the word
-        const wordResult = await db
-          .select()
-          .from(words)
-          .where(eq(words.id, wordId))
-          .limit(1);
-
-        if (wordResult.length === 0) continue;
-
-        // Get all meanings for this word
-        const meaningResults = await db
-          .select()
-          .from(meanings)
-          .where(eq(meanings.wordId, wordId));
-
-        results.push({
-          word: wordResult[0].word,
-          meanings: meaningResults.map((m) => ({
-            partOfSpeech: m.partOfSpeech,
-            meaning: m.meaning,
-            examples: m.examples || [],
-          })),
-        });
-      }
-
-      words = results;
-    } else {
-      // If not found, call AI service based on the service parameter
-      const serviceType = typeof service === 'string' && (service === 'gemini' || service === 'openai') 
-        ? service 
-        : 'openai';
-
-      const lookupService = NormalizedWordLookupFactory.getService(serviceType);
-      words = await lookupService.lookupNormalizedWord(normalizedWord);
-
-      // Store the results in the database if we got any
-      if (words.length > 0) {
-        await storeInDatabase(normalizedWord, words);
-      }
-    }
+    const lookupService = new PostgresNormalizedLookupService();
+    const words = await lookupService.lookupNormalizedWord(normalizedWord);
 
     return res.status(200).json({ words });
   } catch (error) {
@@ -101,47 +33,5 @@ export default async function handler(
     return res
       .status(500)
       .json({ error: "An error occurred while processing your request" });
-  }
-}
-
-async function storeInDatabase(
-  normalizedWord: string,
-  wordsData: WordWithMeanings[],
-) {
-  try {
-    // Insert the normalized word
-    const [normalizedResult] = await db
-      .insert(normalizedWords)
-      .values({ normalizedWord: normalizedWord.toLowerCase() })
-      .returning();
-
-    const normalizedId = normalizedResult.id;
-
-    // Insert each word and its meanings
-    for (const wordData of wordsData) {
-      // Insert the word
-      const [wordResult] = await db
-        .insert(words)
-        .values({ word: wordData.word })
-        .returning();
-
-      const wordId = wordResult.id;
-
-      // Create the normalization link
-      await db.insert(wordNormalization).values({ wordId, normalizedId });
-
-      // Insert meanings
-      for (const meaning of wordData.meanings) {
-        await db.insert(meanings).values({
-          wordId,
-          partOfSpeech: meaning.partOfSpeech,
-          meaning: meaning.meaning,
-          examples: meaning.examples,
-        });
-      }
-    }
-  } catch (error) {
-    console.error("Error storing in database:", error);
-    throw error;
   }
 }
