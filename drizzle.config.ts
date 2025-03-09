@@ -1,14 +1,10 @@
+import { defineConfig } from "drizzle-kit";
 
-import type { Config } from 'drizzle-kit';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-export default {
-  schema: './lib/schema.ts',
-  out: './drizzle',
-  driver: 'pg',
+export default defineConfig({
+  schema: "./lib/schema.ts", // Adjust based on your project structure
+  out: "./drizzle",
+  driver: "pg", // Ensure this is "pg", NOT "d1-http"
   dbCredentials: {
-    connectionString: process.env.DATABASE_URL || '',
+    connectionString: process.env.DATABASE_URL, // Make sure DATABASE_URL is set in Fly.io
   },
-} satisfies Config;
+});
