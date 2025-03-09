@@ -108,9 +108,115 @@
   margin-left: 0.2rem;
 }
 
+.searchForm {
+  display: flex;
+  margin: 2rem 0;
+  width: 100%;
+  max-width: 600px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+}
+
+.searchButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.searchButton:hover {
+  background-color: #0061d3;
+}
+
+.searchButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #d32f2f;
+  margin: 1rem 0;
+}
+
+.results {
+  width: 100%;
+  max-width: 800px;
+  margin-top: 2rem;
+}
+
+.wordCard {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.word {
+  color: #0070f3;
+  font-size: 2rem;
+  margin: 0 0 1rem 0;
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 0.5rem;
+}
+
+.meaning {
+  margin-bottom: 1.5rem;
+}
+
+.partOfSpeech {
+  font-weight: bold;
+  font-style: italic;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.definition {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.examples h4 {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.examples ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.examples li {
+  margin-bottom: 0.5rem;
+}
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;
     flex-direction: column;
+  }
+  
+  .searchForm {
+    flex-direction: column;
+  }
+  
+  .searchInput {
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .searchButton {
+    border-radius: 4px;
   }
 }
