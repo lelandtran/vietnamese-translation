@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
@@ -19,6 +18,7 @@ export default function Home() {
   const [results, setResults] = useState<WordWithMeanings[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [service, setService] = useState('openai'); // Added state for service selection
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,11 +26,11 @@ export default function Home() {
 
     setLoading(true);
     setError('');
-    
+
     try {
-      const response = await fetch(`/api/lookup?word=${encodeURIComponent(normalizedWord)}`);
+      const response = await fetch(`/api/lookup?word=${encodeURIComponent(normalizedWord)}&service=${service}`);
       const data = await response.json();
-      
+
       if (response.ok) {
         setResults(data.words);
       } else {
@@ -53,20 +53,34 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Vietnamese Word Lookup</h1>
-        
+
         <p className={styles.description}>
           Enter a Vietnamese word without diacritics to see all possible words with diacritics
         </p>
 
         <form onSubmit={handleSearch} className={styles.searchForm}>
-          <input
-            type="text"
-            value={normalizedWord}
-            onChange={(e) => setNormalizedWord(e.target.value)}
-            placeholder="Enter a word without diacritics (e.g. 'ca')"
-            className={styles.searchInput}
-          />
-          <button type="submit" className={styles.searchButton} disabled={loading}>
+          <div className={styles.inputGroup}>
+            <input
+              type="text"
+              value={normalizedWord}
+              onChange={(e) => setNormalizedWord(e.target.value)}
+              placeholder="Enter Vietnamese word without diacritics"
+              className={styles.searchInput}
+            />
+            <select 
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+              className={styles.serviceSelect}
+            >
+              <option value="openai">OpenAI</option>
+              <option value="gemini">Gemini Pro</option>
+            </select>
+          </div>
+          <button 
+            type="submit" 
+            className={styles.searchButton}
+            disabled={loading || !normalizedWord}
+          >
             {loading ? 'Searching...' : 'Search'}
           </button>
         </form>
@@ -78,12 +92,12 @@ export default function Home() {
             {results.map((wordData, wordIndex) => (
               <div key={wordIndex} className={styles.wordCard}>
                 <h2 className={styles.word}>{wordData.word}</h2>
-                
+
                 {wordData.meanings.map((meaning, meaningIndex) => (
                   <div key={meaningIndex} className={styles.meaning}>
                     <div className={styles.partOfSpeech}>{meaning.partOfSpeech}</div>
                     <div className={styles.definition}>{meaning.meaning}</div>
-                    
+
                     {meaning.examples.length > 0 && (
                       <div className={styles.examples}>
                         <h4>Examples:</h4>

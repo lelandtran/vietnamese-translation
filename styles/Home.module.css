@@ -115,12 +115,27 @@
   max-width: 600px;
 }
 
+.inputGroup {
+  display: flex;
+  flex: 1;
+}
+
 .searchInput {
   flex: 1;
   padding: 0.75rem 1rem;
   font-size: 1rem;
   border: 1px solid #ccc;
-  border-radius: 4px 0 0 4px;
+  border-radius: 4px 0 0 0;
+  border-bottom-left-radius: 4px;
+}
+
+.serviceSelect {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-left: none;
+  background-color: #f9f9f9;
+  cursor: pointer;
 }
 
 .searchButton {

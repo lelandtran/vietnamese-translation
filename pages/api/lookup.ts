@@ -1,14 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { db } from "../../lib/db";
-import openai from "../../lib/openai";
 import {
   words,
   normalizedWords,
   wordNormalization,
   meanings,
 } from "../../lib/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { WordWithMeanings } from "../../lib/types";
+import { NormalizedWordLookupFactory } from "../../services/NormalizedWordLookupService";
+import { OpenAINormalizedWordLookupService } from "../../services/OpenAINormalizedWordLookupService";
+import { GeminiNormalizedWordLookupService } from "../../services/GeminiNormalizedWordLookupService";
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,7 +20,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { word: normalizedWord } = req.query;
+  const { word: normalizedWord, service = "openai" } = req.query;
 
   if (!normalizedWord || typeof normalizedWord !== "string") {
     return res.status(400).json({ error: "Normalized word is required" });
@@ -79,56 +81,16 @@ export default async function handler(
 
       words = results;
     } else {
-      // If not found, call OpenAI API
-      const chatCompletion = await openai.chat.completions.create({
-        messages: [
-          {
-            role: "user",
-            content: `I have a Vietnamese word without diacritics: "${normalizedWord}".
+      // If not found, call AI service based on the service parameter
+      const serviceType = typeof service === 'string' && (service === 'gemini' || service === 'openai') 
+        ? service 
+        : 'openai';
 
-Please list all possible valid Vietnamese words with diacritics that use the same base letters, along with their part of speech, meanings in English, and example usage.
+      const lookupService = NormalizedWordLookupFactory.getService(serviceType);
+      words = await lookupService.lookupNormalizedWord(normalizedWord);
 
-Format your response as a valid JSON array like this example:
-[
-  {
-    "word": "vietnamese_word_with_diacritics",
-    "meanings": [
-      {
-        "partOfSpeech": "part_of_speech",
-        "meaning": "meaning_in_english",
-        "examples": ["example1", "example2"]
-      },
-      {
-        "partOfSpeech": "another_part_of_speech",
-        "meaning": "another_meaning",
-        "examples": ["example1"]
-      }
-    ]
-  },
-  {
-    "word": "another_vietnamese_word_with_diacritics",
-    "meanings": [
-      {
-        "partOfSpeech": "part_of_speech",
-        "meaning": "meaning_in_english",
-        "examples": ["example1"]
-      }
-    ]
-  }
-]
-
-Only return valid JSON without any explanation or other text.`,
-          },
-        ],
-        model: "gpt-3.5-turbo",
-      });
-
-      const content = chatCompletion.choices[0].message.content;
-
-      if (content) {
-        words = JSON.parse(content) as WordWithMeanings[];
-
-        // Store the results in the database
+      // Store the results in the database if we got any
+      if (words.length > 0) {
         await storeInDatabase(normalizedWord, words);
       }
     }
