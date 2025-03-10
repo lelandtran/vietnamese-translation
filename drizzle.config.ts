@@ -1,4 +1,6 @@
 import { defineConfig } from "drizzle-kit";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
 export default defineConfig({
   schema: "./lib/schema.ts", // Adjust based on your project structure
