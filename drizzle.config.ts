@@ -1,12 +1,15 @@
-import { defineConfig } from "drizzle-kit";
+import type { Config } from "drizzle-kit";
+import dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-export default defineConfig({
-  schema: "./lib/schema.ts", // Adjust based on your project structure
+dotenv.config();
+
+export default {
+  schema: "./lib/schema.ts",
   out: "./drizzle",
-  driver: "pg", // Ensure this is "pg", NOT "d1-http"
+  driver: "pg",
   dbCredentials: {
-    connectionString: process.env.DATABASE_URL, // Make sure DATABASE_URL is set in Fly.io
+    connectionString: process.env.DATABASE_URL || "",
   },
-});
+} satisfies Config;
