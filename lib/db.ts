@@ -8,7 +8,8 @@ dotenv.config();
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
+    servername: 'aws-0-us-west-1.pooler.supabase.com'
   }
 });
 
