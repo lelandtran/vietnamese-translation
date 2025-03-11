@@ -5,12 +5,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
+  ssl: isProduction ? {
+    // In production, we need these specific SSL settings for Supabase's connection pooler
     rejectUnauthorized: false,
-    servername: 'aws-0-us-west-1.pooler.supabase.com'
-  }
+    servername: new URL(process.env.DATABASE_URL || '').hostname
+  } : undefined
 });
 
 export const db = drizzle(pool, { schema });
