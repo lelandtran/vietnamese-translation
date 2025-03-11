@@ -1,5 +1,4 @@
-
-import db from '../lib/db';
+import { queryPool as db } from '../lib/db';
 
 async function setupDatabase() {
   try {

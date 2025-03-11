@@ -14,8 +14,9 @@
   },
   "dependencies": {
     "dotenv": "^16.4.7",
-    "drizzle-kit": "^0.30.5",
-    "drizzle-orm": "^0.40.0",
+    "drizzle-kit": "0.20.6",
+    "drizzle-orm": "0.29.1",
+    "@types/pg": "^8.10.9",
     "next": "^14.1.0",
     "openai": "^4.86.2",
     "pg": "^8.13.3",
