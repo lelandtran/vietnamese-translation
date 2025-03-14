@@ -20,17 +20,21 @@ export default function Home() {
   const [error, setError] = useState("");
   const [service, setService] = useState("gemini"); // Added state for service selection
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchWords = async (existingWords?: string[]) => {
     if (!normalizedWord) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const response = await fetch(
-        `/api/lookup?word=${encodeURIComponent(normalizedWord)}&service=${service}`,
-      );
+      let url = `/api/lookup?word=${encodeURIComponent(normalizedWord)}&service=${service}`;
+      
+      // Add existingWords parameter if provided
+      if (existingWords && existingWords.length > 0) {
+        url += `&existingWords=${existingWords.join(',')}`;
+      }
+      
+      const response = await fetch(url);
       const data = await response.json();
 
       if (response.ok) {
@@ -43,6 +47,17 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchWords();
+  };
+  
+  const handleCheckAgain = async () => {
+    // Extract the words that are already displayed
+    const existingWords = results.map(result => result.word);
+    fetchWords(existingWords);
   };
 
   return (
@@ -95,6 +110,17 @@ export default function Home() {
 
         {results.length > 0 && (
           <div className={styles.results}>
+            <div className={styles.resultsHeader}>
+              <h3>Found {results.length} word{results.length !== 1 ? 's' : ''}</h3>
+              <button 
+                onClick={handleCheckAgain} 
+                className={styles.checkAgainButton}
+                disabled={loading}
+                type="button"
+              >
+                {loading ? "Checking..." : "Please check again"}
+              </button>
+            </div>
             {results.map((wordData, wordIndex) => (
               <div key={wordIndex} className={styles.wordCard}>
                 <h2 className={styles.word}>{wordData.word}</h2>
