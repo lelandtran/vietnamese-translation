@@ -19,6 +19,7 @@ export class GeminiNormalizedWordLookupService
 
   async lookupNormalizedWord(
     normalizedWord: string,
+    existingWords?: string[],
   ): Promise<WordWithMeanings[]> {
     try {
       // Gemini API endpoint
@@ -35,9 +36,19 @@ export class GeminiNormalizedWordLookupService
             {
               parts: [
                 {
-                  text: `I have a Vietnamese word without diacritics: "${normalizedWord}".
+                  text: (() => {
+                    let promptText = `I have a Vietnamese word without diacritics: "${normalizedWord}".
 
-Please list all possible valid Vietnamese words with diacritics that use the same base letters, along with their part of speech, meanings in English, and example usage.
+Please list all possible valid Vietnamese words with diacritics that use the same base letters, along with their part of speech, meanings in English, and example usage.`;
+                    
+                    // Add existing words to the prompt if provided
+                    if (existingWords && existingWords.length > 0) {
+                      promptText += `
+
+Here are the words I already know about: ${existingWords.join(', ')}. Please find any other words that exist. If I have all of the existent words, return an empty result.`;
+                    }
+                    
+                    promptText += `
 
 Format your response as a valid JSON array like this example:
 [
@@ -68,7 +79,10 @@ Format your response as a valid JSON array like this example:
   }
 ]
 
-Only return valid JSON without any explanation or other text.`,
+Only return valid JSON without any explanation or other text.`;
+                    
+                    return promptText;
+                  })(),
                 },
               ],
             },

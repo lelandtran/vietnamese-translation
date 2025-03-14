@@ -15,6 +15,7 @@ export class PostgresNormalizedLookupService
 {
   async lookupNormalizedWord(
     normalizedWord: string,
+    existingWords?: string[],
   ): Promise<WordWithMeanings[]> {
     let results: WordWithMeanings[] = [];
 
@@ -63,7 +64,7 @@ export class PostgresNormalizedLookupService
       const thirdPartyLookupService =
         NormalizedWordLookupFactory.getService("gemini");
       results =
-        await thirdPartyLookupService.lookupNormalizedWord(normalizedWord);
+        await thirdPartyLookupService.lookupNormalizedWord(normalizedWord, existingWords);
 
       // Prepare upsert data for batch insertion
       const normalizedWordUpsertData = {

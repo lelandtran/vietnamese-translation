@@ -17,15 +17,25 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { word: normalizedWord } = req.query;
+  const { word: normalizedWord, existingWords: existingWordsParam } = req.query;
 
   if (!normalizedWord || typeof normalizedWord !== "string") {
     return res.status(400).json({ error: "Normalized word is required" });
   }
+  
+  // Parse existingWords if provided
+  let existingWords: string[] | undefined;
+  if (existingWordsParam) {
+    if (typeof existingWordsParam === "string") {
+      existingWords = existingWordsParam.split(",").map(word => word.trim());
+    } else if (Array.isArray(existingWordsParam)) {
+      existingWords = existingWordsParam.map(word => word.trim());
+    }
+  }
 
   try {
     const lookupService = new PostgresNormalizedLookupService();
-    const words = await lookupService.lookupNormalizedWord(normalizedWord);
+    const words = await lookupService.lookupNormalizedWord(normalizedWord, existingWords);
 
     return res.status(200).json({ words });
   } catch (error) {

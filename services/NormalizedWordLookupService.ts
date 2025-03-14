@@ -3,7 +3,7 @@ import { GeminiNormalizedWordLookupService } from "./GeminiNormalizedWordLookupS
 import { OpenAINormalizedWordLookupService } from "./OpenAINormalizedWordLookupService";
 
 export interface NormalizedWordLookupService {
-  lookupNormalizedWord(normalizedWord: string): Promise<WordWithMeanings[]>;
+  lookupNormalizedWord(normalizedWord: string, existingWords?: string[]): Promise<WordWithMeanings[]>;
 }
 
 export class NormalizedWordLookupFactory {
