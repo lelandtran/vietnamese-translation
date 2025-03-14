@@ -1,10 +1,10 @@
 
 import { WordWithMeanings } from "../lib/types";
-import { NormalizedWordLookupService } from "./NormalizedWordLookupService";
+import { WordLookupService } from "./NormalizedWordLookupService";
 import openai from "../lib/openai";
 
-export class OpenAINormalizedWordLookupService implements NormalizedWordLookupService {
-  async lookupNormalizedWord(normalizedWord: string, existingWords?: string[]): Promise<WordWithMeanings[]> {
+export class OpenAINormalizedWordLookupService implements WordLookupService {
+  async fromNormalizedWord(normalizedWord: string, existingWords?: string[]): Promise<WordWithMeanings[]> {
     let promptContent = `I have a Vietnamese word without diacritics: "${normalizedWord}".
 
 Please list all possible valid Vietnamese words with diacritics that use the same base letters, along with their part of speech, meanings in English, and example usage.`;

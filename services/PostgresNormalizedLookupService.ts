@@ -1,5 +1,5 @@
 import { WordWithMeanings } from "../lib/types";
-import { NormalizedWordLookupService } from "./NormalizedWordLookupService";
+import { WordLookupService } from "./NormalizedWordLookupService";
 import { db } from "../lib/db";
 import {
   words,
@@ -11,9 +11,9 @@ import { eq } from "drizzle-orm";
 import { NormalizedWordLookupFactory } from "./NormalizedWordLookupService";
 
 export class PostgresNormalizedLookupService
-  implements NormalizedWordLookupService
+  implements WordLookupService
 {
-  async lookupNormalizedWord(
+  async fromNormalizedWord(
     normalizedWord: string,
     existingWords?: string[],
   ): Promise<WordWithMeanings[]> {
@@ -64,7 +64,7 @@ export class PostgresNormalizedLookupService
       const thirdPartyLookupService =
         NormalizedWordLookupFactory.getService("gemini");
       results =
-        await thirdPartyLookupService.lookupNormalizedWord(normalizedWord, existingWords);
+        await thirdPartyLookupService.fromNormalizedWord(normalizedWord, existingWords);
 
       // Prepare upsert data for batch insertion
       const normalizedWordUpsertData = {

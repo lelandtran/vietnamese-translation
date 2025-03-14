@@ -1,11 +1,11 @@
 import { WordWithMeanings } from "../lib/types";
-import { NormalizedWordLookupService } from "./NormalizedWordLookupService";
+import { WordLookupService } from "./NormalizedWordLookupService";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 export class GeminiNormalizedWordLookupService
-  implements NormalizedWordLookupService
+  implements WordLookupService
 {
   private apiKey: string;
 
@@ -17,7 +17,7 @@ export class GeminiNormalizedWordLookupService
     this.apiKey = apiKey;
   }
 
-  async lookupNormalizedWord(
+  async fromNormalizedWord(
     normalizedWord: string,
     existingWords?: string[],
   ): Promise<WordWithMeanings[]> {

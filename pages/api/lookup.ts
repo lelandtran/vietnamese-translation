@@ -8,6 +8,7 @@ import {
 } from "../../lib/schema";
 import { NormalizedWordLookupFactory } from "../../services/NormalizedWordLookupService";
 import { PostgresNormalizedLookupService } from "../../services/PostgresNormalizedLookupService";
+import { StubNormalizedWordLookupService } from "../../services/StubNormalizedWordLookupService";
 
 export default async function handler(
   req: NextApiRequest,
@@ -35,7 +36,8 @@ export default async function handler(
 
   try {
     const lookupService = new PostgresNormalizedLookupService();
-    const words = await lookupService.lookupNormalizedWord(normalizedWord, existingWords);
+    // const lookupService = new StubNormalizedWordLookupService();
+    const words = await lookupService.fromNormalizedWord(normalizedWord, existingWords);
 
     return res.status(200).json({ words });
   } catch (error) {

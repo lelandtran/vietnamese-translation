@@ -1,9 +1,9 @@
 import { WordWithMeanings } from "../lib/types";
-import { NormalizedWordLookupService } from "./NormalizedWordLookupService";
+import { WordLookupService } from "./NormalizedWordLookupService";
 
-export class StubNormalizedWordLookupService implements NormalizedWordLookupService {
+export class StubNormalizedWordLookupService implements WordLookupService {
 
-    async lookupNormalizedWord(normalizedWord: string, existingWords?: string[]): Promise<WordWithMeanings[]> {
+    async fromNormalizedWord(normalizedWord: string, existingWords?: string[]): Promise<WordWithMeanings[]> {
         const stubResult = (existingWords && existingWords.length > 0) ? [] : [
             {
                 word: "stub",
